@@ -34,7 +34,7 @@ var FOURTY_SECONDS = 40000;
 require('./config/express')(app);
 
 var visualRecognition = new VisualRecognitionV3({
-  version: '2018-03-19'
+  version: '2018-03-19',
 });
 
 app.get('/', function(req, res) {
@@ -42,7 +42,10 @@ app.get('/', function(req, res) {
 });
 
 var scoreData = function(score) {
-  var scoreColor;
+  var scoreColor = '#000000';
+
+  // REMOVE THIS COMMENT
+  /*
   if (score >= 0.8) {
     scoreColor = '#b9e7c9';
   } else if (score >= 0.6) {
@@ -50,6 +53,7 @@ var scoreData = function(score) {
   } else {
     scoreColor = '#f4bac0';
   }
+  */
   return { score: score, xloc: (score * 312.0), scoreColor: scoreColor};
 };
 
@@ -64,20 +68,6 @@ app.get('/thermometer', function(req, res) {
   } else {
     return res.status(400).json({ error: 'Score value invalid', code: 400 });
   }
-});
-
-app.get('/ready/:classifier_id', function(req, res) {
-  visualRecognition.getClassifier(req.params, function getClassifier(err, classifier) {
-    if (err) {
-      console.log(err);
-      return res.status(err.code || 500).json(err);
-    }
-    res.json(classifier);
-  });
-});
-
-app.get('/train', function(req, res) {
-  res.render('train', null);
 });
 
 app.get('/test', function(req, res) {
@@ -95,112 +85,6 @@ function deleteUploadedFile(readStream) {
     }
   });
 }
-
-/**
- * Creates a classifier
- * @param req.body.bundles Array of selected bundles
- * @param req.body.kind The bundle kind
- */
-app.post('/api/classifiers', app.upload.fields([{ name: 'classupload', maxCount: 3 }, { name: 'negativeclassupload', maxCount: 1 }]), function(req, res) {
-  var formData;
-
-  if (!req.files) {
-    formData = bundleUtils.createFormData(req.body);
-  } else {
-    formData = { name: req.body.classifiername };
-    req.files.classupload.map(function(fileobj, idx) {
-      formData[req.body.classname[idx] + '_positive_examples'] = fs.createReadStream(path.join(fileobj.destination, fileobj.filename));
-    });
-
-    if (req.files.negativeclassupload && req.files.negativeclassupload.length > 0) {
-      var negpath = path.join(req.files.negativeclassupload[0].destination, req.files.negativeclassupload[0].filename);
-      formData.negative_examples = fs.createReadStream(negpath);
-    }
-  }
-
-  visualRecognition.createClassifier(formData, function createClassifier(err, classifier) {
-    if (req.files) {
-      req.files.classupload.map(deleteUploadedFile);
-      if (req.files.negativeclassupload) {
-        req.files.negativeclassupload.map(deleteUploadedFile);
-      }
-    }
-
-    if (err) {
-      console.log(err);
-      return res.status(err.code || 500).json(err);
-    }
-
-    // ENV var prevents classifiers from being destroyed
-    // for users who want that feature
-    if (!process.env.PRESERVE_CLASSIFIERS) {
-      // deletes the classifier after an hour
-      setTimeout(visualRecognition.deleteClassifier.bind(visualRecognition, classifier), ONE_HOUR);
-      res.json(classifier);
-    }
-  });
-});
-
-app.post('/api/retrain/:classifier_id', app.upload.any(), function(req, res) {
-  let formData = { classifier_id: req.params.classifier_id };
-  if (req.file) {
-    if (req.file.fieldname.match(/^(negative_examples|.*_positive_examples)$/)) {
-      formData[req.file.fieldname] = fs.createReadStream(req.file.path);
-    }
-  }
-  let bodyKeys = Object.keys(req.body);
-
-  bodyKeys.length && bodyKeys.reduce(function(store, item) {
-    let pathToZip = path.join('./public/images/bundles', req.body[item]);
-    try {
-      fs.statSync(pathToZip);
-      store[item] = fs.createReadStream(pathToZip);
-    } catch (err) {
-      console.log(pathToZip, " path not found");
-    }
-    return store;
-  },formData);
-
-  req.files && req.files.reduce(function (store, item) {
-    if (item.fieldname.match(/^(negative_examples|.*_positive_examples)$/)) {
-      store[item.fieldname] = fs.createReadStream(item.path);
-    }
-    return store;
-  }, formData);
-
-  visualRecognition.retrainClassifier(formData, function(err, classifier) {
-    if (err) {
-      console.log(err, Object.keys(formData),classifier);
-    }
-    Object.keys(formData).filter(function(item) { return item !== 'classifier_id'; }).map(function (item) {
-      if (formData[item].path.match("public/images/bundles") === null) {
-        fs.unlink(formData[item].path, function (e) {
-          if (e) {
-            console.log("Error removeing " + formData[item].path);
-          }
-        });
-      }
-    });
-    if (err) {
-      res.json(err)
-    } else {
-      res.json(classifier);
-    }
-  });
-});
-
-/**
- * Gets the status of a classifier
- * @param req.params.classifier_id The classifier id
- */
-app.get('/api/classifiers/:classifier_id', function(req, res) {
-  visualRecognition.getClassifier(req.params, function getClassifier(err, classifier) {
-    if (err) {
-      console.log(err);
-      return res.status(err.code || 500).json(err);
-    }
-    res.json(classifier);
-  });});
 
 /**
  * Parse a base 64 image and return the extension and buffer
@@ -261,7 +145,7 @@ app.post('/api/classify', app.upload.single('images_file'), function(req, res) {
     params.classifier_ids = ['default', 'food'];
     params.threshold = 0.5; //So the classifers only show images with a confindence level of 0.5 or higher
     methods.push('classify');
-    methods.push('detectFaces');
+    // methods.push('detectFaces');
   }
 
   // run the 3 classifiers asynchronously and combine the results

@@ -239,13 +239,20 @@ class ScoreTableHeader extends React.Component {
 
 class ClassifyScoreRow extends React.Component {
   scoreColor() {
+    let className = "results-table--score-value";
+
+    // REMOVE THIS COMMENT
+    /*
     if (this.props.score > 0.75) {
-      return "results-table--score-value results-table--score-value_good";
+      className += " results-table--score-value_good";
     } else if (this.props.score < 0.5) {
-      return "results-table--score-value results-table--score-value_bad";
+      className += " results-table--score-value_bad";
     } else {
-      return "results-table--score-value results-table--score-value_ok";
+      className += " results-table--score-value_ok";
     }
+    */
+
+    return className;
   }
   render() {
     return (<tr className="base--tr">

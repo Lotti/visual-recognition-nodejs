@@ -47,7 +47,8 @@
     "lint": "eslint .",
     "autofix": "eslint --fix .",
     "codecov": "npm run test && (codecov || true)",
-    "validate": "npm ls"
+    "validate": "npm ls",
+    "watch": "nodemon server.js"
   },
   "dependencies": {
     "async": "^2.6.1",
@@ -85,6 +86,7 @@
     "istanbul": "^0.4.5",
     "jest": "^23.6.0",
     "mocha": "^5.2.0",
+    "nodemon": "^1.18.10",
     "phantomjs-prebuilt": "^2.1.16",
     "precommit-hook": "^3.0.0",
     "supertest": "^3.3.0"

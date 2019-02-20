@@ -1,4 +1,7 @@
 <h1 align="center" style="border-bottom: none;">🚀 Visual Recognition Sample Application</h1>
+
+[![Deploy to IBM Cloud](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://github.com/Lotti/visual-recognition-nodejs.git)
+
 <h3 align="center">This Node.js app demonstrates some of the Visual Recognition service features.</h3>
 <p align="center">
   <a href="http://travis-ci.org/watson-developer-cloud/visual-recognition-nodejs">
