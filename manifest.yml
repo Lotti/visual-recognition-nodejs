@@ -3,4 +3,4 @@ applications:
 - name: visual-recognition-demo
   path: .
   command: npm start
-  memory: 768M
+  memory: 256M

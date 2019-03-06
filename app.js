@@ -145,7 +145,8 @@ app.post('/api/classify', app.upload.single('images_file'), function(req, res) {
     params.classifier_ids = ['default', 'food'];
     params.threshold = 0.5; //So the classifers only show images with a confindence level of 0.5 or higher
     methods.push('classify');
-    // methods.push('detectFaces');
+    // REMOVE THIS COMMENT
+    // methods.push('detectFaces'); // disabled for performance improving
   }
 
   // run the 3 classifiers asynchronously and combine the results
