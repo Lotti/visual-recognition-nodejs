@@ -4,3 +4,7 @@ applications:
   path: .
   command: npm start
   memory: 256M
+  buildpacks:
+    - sdk-for-nodejs
+  env:
+    VISUAL_RECOGNITION_IAM_APIKEY: ((VISUAL_RECOGNITION_IAM_APIKEY))
